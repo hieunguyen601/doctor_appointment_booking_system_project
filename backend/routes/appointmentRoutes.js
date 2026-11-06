@@ -75,4 +75,27 @@ router.post("/", authMiddleware, requireRole("patient"), async (req, res) => {
   }
 });
 
+router.get(
+  "/mine",
+  authMiddleware,
+  requireRole("patient"),
+  async (req, res) => {
+    try {
+      const appointments = await Appointment.find({
+        patient: req.userId,
+      })
+        .populate("doctor", "name specialization")
+        .sort({ startsAt: 1 });
+
+      res.status(200).json({
+        message: "Appointment retrieved successfully!",
+        data: appointments,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Server error" });
+    }
+  },
+);
+
 export default router;
