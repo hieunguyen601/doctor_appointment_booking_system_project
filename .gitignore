@@ -1,0 +1,7 @@
+# Local environment variables and secrets (in every directory)
+node_modules/
+.env
+.env.*
+!.env.example
+dist/
+coverage/
