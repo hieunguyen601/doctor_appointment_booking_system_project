@@ -55,6 +55,16 @@ A full-stack web application that allows patients to find doctors, book appointm
 - MongoDB indexes prevent duplicate active appointment slots.
 - Sensitive credentials are stored in environment variables.
 
+## Local Backend Setup
+
+1. Run `npm ci` in `backend/`.
+2. Copy `backend/.env.example` to `backend/.env`.
+3. Set `MONGODB_URI` to your Atlas connection string. URL-encode the database password when inserting it into the URI.
+4. Generate a local signing secret with `node -e "console.log(require('node:crypto').randomBytes(48).toString('hex'))"` and use it as `JWT_SECRET`.
+5. Run `npm run dev` in `backend/`.
+
+Keep `.env` files local; commit only placeholder values in `.env.example`. If credentials are exposed, rotate the Atlas password and JWT secret before removing them from Git history. Restart running backend instances with the new values; changing the JWT secret invalidates existing login tokens.
+
 ## Future Improvements
 
 - Complete the React frontend
