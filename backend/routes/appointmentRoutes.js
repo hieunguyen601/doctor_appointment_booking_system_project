@@ -98,4 +98,53 @@ router.get(
   },
 );
 
+router.patch(
+  "/:id/cancel",
+  authMiddleware,
+  requireRole("patient"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({
+          message: "Invalid appointment ID",
+        });
+      }
+
+      const appointment = await Appointment.findOneAndUpdate(
+        {
+          _id: id,
+          patient: req.userId,
+          status: "booked",
+          startsAt: { $gt: new Date() },
+        },
+        {
+          $set: { status: "cancelled" },
+        },
+        {
+          new: true,
+          runValidators: true,
+        },
+      );
+
+      if (!appointment) {
+        return res.status(404).json({
+          message: "Active future appointment not found",
+        });
+      }
+
+      res.status(200).json({
+        message: "Update the appointment successfully",
+        data: appointment,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Server error",
+      });
+    }
+  },
+);
+
 export default router;
