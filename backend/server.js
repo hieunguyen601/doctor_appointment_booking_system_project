@@ -47,7 +47,7 @@ const startServer = async () => {
   try {
     await connectDB();
 
-    await DoctorAvailability.init();
+    await Promise.all([Appointment.init(), DoctorAvailability.init()]);
     console.log("Doctor availability indexes ready");
 
     app.listen(port, () => {
