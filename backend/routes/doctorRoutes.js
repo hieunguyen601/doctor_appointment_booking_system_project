@@ -1,6 +1,9 @@
 import express from "express";
 import mongoose from "mongoose";
 import Doctor from "../models/Doctor.js";
+import authMiddleware from "../middleware/authMiddleware.js";
+import DoctorAvailability from "../models/DoctorAvailability.js";
+import requireRole from "../middleware/requireRole.js";
 
 const doctorRoutes = express.Router();
 
@@ -136,5 +139,79 @@ doctorRoutes.delete("/:id", async (req, res) => {
     });
   }
 });
+
+doctorRoutes.post(
+  "/:id/availability",
+  authMiddleware,
+  requireRole("admin"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { dayOfWeek, startTime, endTime } = req.body;
+
+      if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({
+          message: "Invalid doctor ID",
+        });
+      }
+
+      const doctor = await Doctor.findById(id);
+
+      if (!doctor) {
+        return res.status(404).json({
+          message: "Doctor not found",
+        });
+      }
+
+      if (!Number.isInteger(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
+        return res.status(400).json({
+          message: "Day must be between 0 and 6",
+        });
+      }
+
+      const timeFormat = /^([01]\d|2[0-3]):(00|30)$/;
+
+      if (
+        typeof startTime !== "string" ||
+        typeof endTime !== "string" ||
+        !timeFormat.test(startTime) ||
+        !timeFormat.test(endTime) ||
+        startTime >= endTime
+      ) {
+        return res.status(400).json({
+          message: "Invalid working hours",
+        });
+      }
+
+      const availability = await DoctorAvailability.create({
+        doctor: id,
+        dayOfWeek,
+        startTime,
+        endTime,
+      });
+
+      return res.status(201).json({
+        message: "Doctor availability created successfully!",
+      });
+    } catch (error) {
+      if (error.code === 11000) {
+        return res.status(409).json({
+          message: "Schedule already exists for this day",
+        });
+      }
+
+      if (error.name === "ValidationError") {
+        return res.status(400).json({
+          message: error.message,
+        });
+      }
+      
+      console.error(error);
+      res.status(500).json({
+        message: "Server error",
+      });
+    }
+  },
+);
 
 export default doctorRoutes;
