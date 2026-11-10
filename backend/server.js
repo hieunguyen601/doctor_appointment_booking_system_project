@@ -44,11 +44,19 @@ app.post("/api/doctors", async (req, res) => {
 });
 
 const startServer = async () => {
-  await connectDB();
+  try {
+    await connectDB();
 
-  app.listen(port, () => {
-    console.log("Server is running on port", port);
-  });
+    await DoctorAvailability.init();
+    console.log("Doctor availability indexes ready");
+
+    app.listen(port, () => {
+      console.log("Server is running on port", port);
+    });
+  } catch (error) {
+    console.error("Server startup failed:", error);
+    process.exit(1);
+  }
 };
 
 startServer();
