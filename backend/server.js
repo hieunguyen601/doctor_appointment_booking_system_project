@@ -6,6 +6,8 @@ import Doctor from "./models/Doctor.js";
 import doctorRoutes from "./routes/doctorRoutes.js";
 import userRoutes from "./routes/authRoutes.js";
 import router from "./routes/appointmentRoutes.js";
+import Appointment from "./models/Appointment.js";
+import DoctorAvailability from "./models/DoctorAvailability.js";
 
 const app = express();
 const port = process.env.PORT || 3000;

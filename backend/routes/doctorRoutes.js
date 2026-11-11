@@ -4,6 +4,7 @@ import Doctor from "../models/Doctor.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import DoctorAvailability from "../models/DoctorAvailability.js";
 import requireRole from "../middleware/requireRole.js";
+import Appointment from "../models/Appointment.js";
 import { DateTime } from "luxon";
 const doctorRoutes = express.Router();
 
@@ -214,7 +215,7 @@ doctorRoutes.post(
   },
 );
 
-doctorRoutes.get(":/id/slots", async (req, res) => {
+doctorRoutes.get("/:id/slots", async (req, res) => {
   try {
     const { id } = req.params;
     const { data } = req.query;
